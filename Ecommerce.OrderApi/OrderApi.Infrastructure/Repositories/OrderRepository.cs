@@ -31,12 +31,11 @@ namespace OrderApi.Infrastructure.Repositories
             }
 
         }
-
         public async Task<Response> DeleteAsync(int Id)
         {
             try
             {
-                var order = await context.Orders.FindAsync(Id);
+                var order = await GetByIdAsync(Id);
                 if (order == null)
                 {
                     return new Response(false, "Order Not Found");
@@ -44,7 +43,6 @@ namespace OrderApi.Infrastructure.Repositories
                 context.Orders.Remove(order);
                 await context.SaveChangesAsync();
                 return new Response(true, "Order Deleted Successfully");
-
             }
             catch (Exception ex)
             {
@@ -57,7 +55,7 @@ namespace OrderApi.Infrastructure.Repositories
         {
             try
             {
-                var orders = await context.Orders.ToListAsync();
+                var orders = await context.Orders.AsNoTracking().ToListAsync();
                 return orders is not null ? orders : null!;
             }
             catch (Exception ex)

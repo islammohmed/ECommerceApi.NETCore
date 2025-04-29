@@ -17,26 +17,17 @@ namespace OrderApi.Application.Services
         public async Task<ProductDTO> GetProduct(int productId)
         {
             var response = await httpClient.GetAsync($"api/products/{productId}");
-            if (response.IsSuccessStatusCode)
-            {
-                return await response.Content.ReadFromJsonAsync<ProductDTO>();
-            }
-            else
-            {
-                throw new Exception("Error fetching product");
-            }
+            if(!response.IsSuccessStatusCode) return null!;
+            var product = await response.Content.ReadFromJsonAsync<ProductDTO>();
+            return product!;
         }
         public async Task<AppUserDTO>GetUser(int userId)
         {
             var getUser = await httpClient.GetAsync($"api/users/{userId}");
-            if (getUser.IsSuccessStatusCode)
-            {
-                return await getUser.Content.ReadFromJsonAsync<AppUserDTO>();
-            }
-            else
-            {
-                throw new Exception("Error fetching user");
-            }
+            if (!getUser.IsSuccessStatusCode) return null!;
+            var user = await getUser.Content.ReadFromJsonAsync<AppUserDTO>();
+            return user!;
+
         }
         public Task<IEnumerable<OrderDto>> GetOrderByClientID(string id)
         {
@@ -46,13 +37,13 @@ namespace OrderApi.Application.Services
         public async Task<OrderDetailsDTO> GetOrderDetails(int orderId)
         {
             var order = await orderInterface.GetByIdAsync(orderId);
-            if (order == null)
+            if (order is null)
             {
                 return null;
             }
-           var retryPipline = resiliencePipeline.GetPipeline("retry");
-            var product = await retryPipline.ExecuteAsync(async token=>await GetProduct(order.ProductId));
-            var user = await retryPipline.ExecuteAsync(async token =>await GetUser(order.ClientId));
+           var retryPipeline = resiliencePipeline.GetPipeline("my-retry-pipeline");
+            var product = await retryPipeline.ExecuteAsync(async token=>await GetProduct(order.ProductId));
+            var user = await retryPipeline.ExecuteAsync(async token =>await GetUser(order.ClientId));
             return new OrderDetailsDTO
                 (
                     order.Id,
@@ -71,13 +62,9 @@ namespace OrderApi.Application.Services
         }
         public async Task<IEnumerable<OrderDto>> GetOrdersByClientId(int clientId)
         {
-            var orders = await orderInterface.GetAllAsync();
-            if (orders == null)
-            {
-                return null;
-            }
-            var ClientOrder = orders.Where(o => o.ClientId == clientId);
-            var(_,_orders) = OrderConversion.FromEntity(null, ClientOrder);
+            var orders = await orderInterface.GetOrdersAsync(x => x.ClientId == clientId);
+            if(!orders.Any()) return null!;
+            var (_,_orders) = OrderConversion.FromEntity(null, orders);
             return _orders!;
 
         }
