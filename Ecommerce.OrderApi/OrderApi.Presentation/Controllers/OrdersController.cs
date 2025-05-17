@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using OrderApi.Application.DTOs;
 using OrderApi.Application.DTOs.Conversions;
@@ -8,38 +9,40 @@ namespace OrderApi.Presentation.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [AllowAnonymous]
     public class OrdersController(IOrder orderInterface, IOrderService orderService) : ControllerBase
     {
         [HttpGet]
         public async Task<ActionResult<IEnumerable<OrderDto>>> GetOrders()
         {
             var orders = await orderInterface.GetAllAsync();
-            if (orders == null)
+            if (!orders.Any())
             {
                 return NotFound("No Orders Found");
-
             }
+
             var (_, list) = OrderConversion.FromEntity(null, orders);
-            return !list!.Any() ? NotFound() : Ok(list);
+            return !list.Any() ? NotFound() : Ok(list);
+
         }
 
         [HttpPost]
-        public async Task<ActionResult<OrderDto>> CreateOrder(OrderDto orderDto)
+        public async Task<ActionResult<OrderDto>> CreateOrder([FromBody] CreateOrderDto orderDto)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var order = OrderConversion.ToEntity(orderDto);
-            var createdOrder = await orderInterface.GetAllAsync();
-            if (createdOrder == null)
+         var getEntity = OrderConversion.ToEntity(orderDto);
+            var order = await orderInterface.CreateAsync(getEntity);
+            if (order == null)
             {
                 return BadRequest("Failed to create order");
             }
-            var (_, list) = OrderConversion.FromEntity(null, createdOrder);
-            return !list!.Any() ? NotFound() : Ok(list);
+            return Ok(order);
         }
+
         [HttpGet("{id:int}")]
         public async Task<ActionResult<OrderDto>> GetOrderById(int id)
         {
@@ -52,7 +55,7 @@ namespace OrderApi.Presentation.Controllers
             return orderDto is null ? NotFound() : Ok(orderDto);
         }
         [HttpPut]
-        public async Task<ActionResult<OrderDto>> UpdateOrder(int id, OrderDto dto)
+        public async Task<ActionResult<OrderDto>> UpdateOrder(int id, CreateOrderDto dto)
         {
             if (!ModelState.IsValid)
             {

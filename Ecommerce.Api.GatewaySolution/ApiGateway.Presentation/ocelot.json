@@ -1,0 +1,139 @@
+{
+    "Routes": [
+        {
+            "DownstreamPathTemplate": "/api/authentication/{everything}",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "localhost",
+                    "Port": 5001
+                }
+            ],
+            "UpstreamPathTemplate": "/api/authentication/{everything}",
+            "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
+            "Key": "AuthenticationService",
+            "ServiceName": "AuthenticationService",
+            "RateLimitOptions": {
+                "ClientIdHeader": "X-ClientId",
+                "EnableRateLimiting": true,
+                "HttpStatusCode": 429,
+                "QuotaExceededMessage": "Quota exceeded",
+                "RateLimitExceededMessage": "Rate limit exceeded",
+                "RateLimitCounterPrefix": "ocelot",
+                "RateLimitCounterKey": "{clientId}",
+                "RateLimitCounterKeySeparator": ":"
+            }
+        },
+        {
+            "DownstreamPathTemplate": "/api/products/{everything}",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "localhost",
+                    "Port": 5002
+                }
+            ],
+            "UpstreamPathTemplate": "/api/products/{everything}",
+            "UpstreamHttpMethod": [ "Get" ],
+            "Key": "ProductServiceGet",
+            "ServiceName": "ProductService"
+        },
+        {
+            "DownstreamPathTemplate": "/api/product/{id}",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "localhost",
+                    "Port": 5002
+                }
+            ],
+            "UpstreamPathTemplate": "/api/product/{id}",
+            "UpstreamHttpMethod": [ "Get" ],
+            "Key": "ProductById",
+            "ServiceName": "ProductService",
+            "FileCacheOptions": {
+                "TtlSeconds": 60,
+                "Region": "product",
+                "CacheKey": "{id}",
+                "Header": "eCommerce-Caching-Control"
+            }
+        },
+        {
+            "DownstreamPathTemplate": "/api/products/{everything}",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "localhost",
+                    "Port": 5002
+                }
+            ],
+            "UpstreamPathTemplate": "/api/products/{everything}",
+            "UpstreamHttpMethod": [ "Post", "Put", "Delete" ],
+            "AuthenticationOptions": {
+                "AuthenticationProviderKey": "Bearer",
+                "AllowedScopes": []
+            },
+            "Key": "ProductServiceWrite",
+            "ServiceName": "ProductService"
+        },
+        {
+            "DownstreamPathTemplate": "/api/orders/{everything}",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "localhost",
+                    "Port": 5003
+                }
+            ],
+            "UpstreamPathTemplate": "/api/orders/{everything}",
+            "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
+            "Key": "OrderServiceFull",
+            "ServiceName": "OrderService"
+        },
+        {
+            "DownstreamPathTemplate": "/api/order/{id}",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "localhost",
+                    "Port": 5003
+                }
+            ],
+            "UpstreamPathTemplate": "/api/order/{id}",
+            "UpstreamHttpMethod": [ "Get" ],
+            "Key": "OrderById",
+            "ServiceName": "OrderService"
+        },
+        {
+            "DownstreamPathTemplate": "/api/orders/{everything}",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "localhost",
+                    "Port": 5003
+                }
+            ],
+            "UpstreamPathTemplate": "/api/orders/{everything}",
+            "UpstreamHttpMethod": [ "Post", "Put", "Delete" ],
+            "AuthenticationOptions": {
+                "AuthenticationProviderKey": "Bearer",
+                "AllowedScopes": []
+            },
+            "Key": "OrderServiceWrite",
+            "ServiceName": "OrderService"
+        }
+    ],
+    "GlobalConfiguration": {
+        "BaseUrl": "https://localhost:5003",
+        "RateLimitOptions": {
+            "ClientIdHeader": "X-ClientId",
+            "EnableRateLimiting": true,
+            "HttpStatusCode": 429,
+            "QuotaExceededMessage": "Quota exceeded",
+            "RateLimitExceededMessage": "Rate limit exceeded",
+            "RateLimitCounterPrefix": "ocelot",
+            "RateLimitCounterKey": "{clientId}",
+            "RateLimitCounterKeySeparator": ":"
+        }
+    }
+}

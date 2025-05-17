@@ -4,10 +4,12 @@ using ProductApi.Application.DTOs;
 using ProductApi.Application.Interfaces;
 using ProductApi.Application.DTOs.Convenstions;
 using Azure;
+using Microsoft.AspNetCore.Authorization;
 namespace ProductApi.Presentation.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [AllowAnonymous]
     public class ProductController(IProduct ProductInterface) : ControllerBase
     {
         [HttpGet]
@@ -34,6 +36,7 @@ namespace ProductApi.Presentation.Controllers
             return product is not null ? Ok(product) : NotFound("No Product found");
         }
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<Response>> CreateProduct([FromBody]CreateProductDto product )
         {
             if (!ModelState.IsValid) {
@@ -44,6 +47,7 @@ namespace ProductApi.Presentation.Controllers
             return Ok(response);
         }
         [HttpPut]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<Response>> UpdateProduct(int id , UpdateProductDto dto )
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);

@@ -19,4 +19,22 @@ namespace OrderApi.Application.DTOs
     DateTime OrderDate 
 
         );
+    public record CreateOrderDto(
+   [Required,Range(1, int.MaxValue, ErrorMessage = "ProductId must be greater than 0")]
+    int ProductId,
+   [Required,Range(1, int.MaxValue, ErrorMessage = "ClientId must be greater than 0")]
+    int ClientId,
+   [Required,Range(1, int.MaxValue, ErrorMessage = "PurchaseQuantity must be greater than 0")]
+    int PurchaseQuantity,
+   DateTime OrderDate
+       );
+    public record UpdateOrderDto(
+[Required,Range(1, int.MaxValue, ErrorMessage = "ProductId must be greater than 0")]
+    int ProductId,
+[Required,Range(1, int.MaxValue, ErrorMessage = "ClientId must be greater than 0")]
+    int ClientId,
+[Required,Range(1, int.MaxValue, ErrorMessage = "PurchaseQuantity must be greater than 0")]
+    int PurchaseQuantity,
+DateTime OrderDate
+   );
 }
